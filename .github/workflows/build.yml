@@ -11,23 +11,23 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Install vcpkg
-      run: |
-        git clone https://github.com/microsoft/vcpkg.git
-        .\vcpkg\bootstrap-vcpkg.bat
-        .\vcpkg\vcpkg install curl:x64-windows libjpeg-turbo:x64-windows
+    - name: Install MSYS2
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: MINGW64
+        update: true
+        install: >
+          mingw-w64-x86_64-gcc
+          mingw-w64-x86_64-curl
+          mingw-w64-x86_64-libjpeg-turbo
 
     - name: Build
+      shell: msys2 {0}
       run: |
-        cl main.c ^
-        /I vcpkg\installed\x64-windows\include ^
-        /link ^
-        /LIBPATH:vcpkg\installed\x64-windows\lib ^
-        libcurl.lib jpeg.lib ^
-        ws2_32.lib wldap32.lib crypt32.lib
-          
+        gcc main.c -o mapbot.exe -ljpeg -lcurl -lm
+
     - name: Upload EXE
       uses: actions/upload-artifact@v4
       with:
         name: mapbot
-        path: main.exe
+        path: mapbot.exe
