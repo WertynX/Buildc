@@ -1,0 +1,33 @@
+name: Build Windows EXE
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install vcpkg
+      run: |
+        git clone https://github.com/microsoft/vcpkg.git
+        .\vcpkg\bootstrap-vcpkg.bat
+        .\vcpkg\vcpkg install curl:x64-windows libjpeg-turbo:x64-windows
+
+    - name: Build
+      run: |
+        cl main.c ^
+        /I vcpkg\installed\x64-windows\include ^
+        /link ^
+        /LIBPATH:vcpkg\installed\x64-windows\lib ^
+        libcurl.lib jpeg.lib ^
+        ws2_32.lib wldap32.lib crypt32.lib
+          
+    - name: Upload EXE
+      uses: actions/upload-artifact@v4
+      with:
+        name: mapbot
+        path: main.exe
