@@ -1,4 +1,4 @@
-name: Build Windows EXE
+name: Build Windows EXE (Static)
 
 on:
   push:
@@ -20,11 +20,16 @@ jobs:
           mingw-w64-x86_64-gcc
           mingw-w64-x86_64-curl
           mingw-w64-x86_64-libjpeg-turbo
+          mingw-w64-x86_64-ca-certificates
 
-    - name: Build
+    - name: Build Static EXE
       shell: msys2 {0}
       run: |
-        gcc main.c -o mapbot.exe -ljpeg -lcurl -lm
+        gcc main.c -o mapbot.exe \
+          -static -static-libgcc -static-libstdc++ \
+          -ljpeg -lcurl \
+          -lws2_32 -lwldap32 -lcrypt32 -lbcrypt \
+          -lm
 
     - name: Upload EXE
       uses: actions/upload-artifact@v4
