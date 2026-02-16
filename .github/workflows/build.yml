@@ -1,4 +1,4 @@
-name: Build Windows EXE (Static)
+name: Build Windows EXE
 
 on:
   push:
@@ -20,19 +20,25 @@ jobs:
           mingw-w64-x86_64-gcc
           mingw-w64-x86_64-curl
           mingw-w64-x86_64-libjpeg-turbo
-          mingw-w64-x86_64-ca-certificates
 
-    - name: Build Static EXE
+    - name: Build
       shell: msys2 {0}
       run: |
-        gcc main.c -o mapbot.exe \
-          -static -static-libgcc -static-libstdc++ \
-          -ljpeg -lcurl \
-          -lws2_32 -lwldap32 -lcrypt32 -lbcrypt \
-          -lm
+        gcc main.c -o mapbot.exe -ljpeg -lcurl -lm
 
-    - name: Upload EXE
+    - name: Copy required DLLs
+      shell: msys2 {0}
+      run: |
+        cp /mingw64/bin/libcurl-4.dll .
+        cp /mingw64/bin/libjpeg-8.dll .
+        cp /mingw64/bin/libgcc_s_seh-1.dll .
+        cp /mingw64/bin/libstdc++-6.dll .
+        cp /mingw64/bin/libwinpthread-1.dll .
+
+    - name: Upload build
       uses: actions/upload-artifact@v4
       with:
         name: mapbot
-        path: mapbot.exe
+        path: |
+          mapbot.exe
+          *.dll
